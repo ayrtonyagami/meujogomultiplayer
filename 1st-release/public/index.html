@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Yagami multiplayer</title>
+        <style>
+            #screen{
+                border:10px solid grey;
+                image-rendering: pixelated;
+                image-rendering: crisp-edges;
+                image-rendering: -moz-crisp-edges;
+                width:500px;
+                height:500px;
+            }
+        </style>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <canvas id="screen" width="10" height="10"></canvas>
+
+        <script type="module">
+            import createGame from './game.js';
+            import createKeyBoardListener from './keyBoardListener.js';
+            import renderScreen from './renderScreen.js';
+             
+            const jogo = createGame();
+            const keyBoardListener = createKeyBoardListener(document);
+            const screen = document.getElementById("screen");
+            renderScreen(screen,jogo,requestAnimationFrame);
+
+            keyBoardListener.subscribe(jogo.movePlayer);
+
+            const socket = io();
+
+            socket.on('connect',()=>{
+                const playerId = socket.id;
+                console.log("Player connected on client with id" + playerId);
+            });
+
+            socket.on('inicializar',(state)=>{
+                console.log(state);
+                jogo.setState(state);
+            });
+
+            socket.on('add-player',(command)=>{
+                console.log(`Recebendo ${command.type} => ${command.playerId}`);
+                jogo.addPlayer(command);
+            });
+            
+
+
+            
+        </script>
+    </body>
+</html>
