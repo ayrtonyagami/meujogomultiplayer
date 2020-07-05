@@ -21,6 +21,11 @@ export default function createGame(){
         }
     }
 
+    function start(){
+        const frequency = 2000;
+        setInterval(addFruit,frequency);
+    }
+
     function addPlayer(command){
         const playerId = command.playerId;
         const playerX = 'playerX' in command ? command.playerX : Math.floor(Math.random()*state.screen.width);
@@ -41,23 +46,41 @@ export default function createGame(){
     function removePlayer(command){
         const id = command.playerId;
         delete state.players[id];
+
+        notifyAll({
+            type:'remove-player',
+            playerId: id
+        });
     }
 
     function addFruit(command){
-        const fruitID = command.fruitID;
-        const fruitX = command.fruitX;
-        const fruitY = command.fruitY;
+        const fruitID = command ? command.fruitID : Math.floor(Math.random()*10000000);
+        const fruitX = command ? command.fruitX : Math.floor(Math.random()*state.screen.width);
+        const fruitY = command ? command.fruitY : Math.floor(Math.random()*state.screen.height);
         
         state.frutas[fruitID] = {
             x : fruitX,
             y : fruitY
         }
+
+        notifyAll({
+            type:'add-fruit',
+            fruitID: fruitID,
+            fruitX: fruitX,
+            fruitY: fruitY
+        });
     }
 
     function removeFruit(command){
         const id = command.fruitID
 
         delete state.frutas[id];
+
+        
+        notifyAll({
+            type:'remove-fruit',
+            fruitID: id
+        });
     }
 
     function setState(newState){
@@ -77,7 +100,7 @@ export default function createGame(){
     }
 
     function movePlayer(command){
-        
+        notifyAll(command);
         const movimentosAceites = {
             ArrowUp : function(player){
                 if(player.y > 0){
@@ -114,6 +137,7 @@ export default function createGame(){
             checkForFruitCollision(command.player);
         }
         
+        
     }
 
     return{
@@ -124,6 +148,7 @@ export default function createGame(){
         movePlayer,
         state,
         setState,
-        subscribe
+        subscribe,
+        start
     };
 }

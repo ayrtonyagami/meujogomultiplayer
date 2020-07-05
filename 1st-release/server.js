@@ -10,6 +10,7 @@ const sockets = socketio(server);
 app.use(express.static('public'));
 
 const jogo = createGame();
+jogo.start();
 
 jogo.subscribe((commant)=>{
     console.log(`>Emitir ${commant.type}`);
@@ -31,6 +32,13 @@ sockets.on('connection',(socket)=>{
         jogo.removePlayer({playerId:playerId});
         console.log('Desconectar player '+ playerId);
     })
+
+    socket.on('move-player',(command)=>{
+        command.playerId = playerId;
+        command.type = 'move-player';
+
+        jogo.movePlayer(command);
+    });
 
 });
 

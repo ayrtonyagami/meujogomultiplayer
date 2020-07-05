@@ -1,4 +1,4 @@
-export default function renderScreen(screen, jogo, requestAnimationFrame){
+export default function renderScreen(screen, jogo, requestAnimationFrame,correntPlayerId){
     const context = screen.getContext("2d");
 
     context.clearRect(0,0,10,10);
@@ -13,8 +13,17 @@ export default function renderScreen(screen, jogo, requestAnimationFrame){
         context.fillStyle = "green"
         context.fillRect(fruta.x,fruta.y,1,1)
     }
+    
+    const correntPlayer = jogo.state.players[correntPlayerId];
+    if(correntPlayer){
+        context.strokeStyle = "black";
+        context.lineWidth = 2;
+        context.fillStyle = "yellow";        
+        context.fillRect(correntPlayer.x,correntPlayer.y,1,1)
+
+    }
 
     requestAnimationFrame(() =>{
-        renderScreen(screen,jogo,requestAnimationFrame);
+        renderScreen(screen,jogo,requestAnimationFrame,correntPlayerId);
     });
 }

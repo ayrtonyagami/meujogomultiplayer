@@ -24,21 +24,27 @@
              
             const jogo = createGame();
             const keyBoardListener = createKeyBoardListener(document);
-            const screen = document.getElementById("screen");
-            renderScreen(screen,jogo,requestAnimationFrame);
-
-            keyBoardListener.subscribe(jogo.movePlayer);
+            
 
             const socket = io();
 
             socket.on('connect',()=>{
                 const playerId = socket.id;
                 console.log("Player connected on client with id" + playerId);
+                
+                const screen = document.getElementById("screen");
+                renderScreen(screen,jogo,requestAnimationFrame,playerId);
             });
 
             socket.on('inicializar',(state)=>{
-                console.log(state);
+                const playerId = socket.id;
                 jogo.setState(state);
+
+                keyBoardListener.registerPlayerId(playerId);
+                keyBoardListener.subscribe(jogo.movePlayer);
+                keyBoardListener.subscribe((command)=>{
+                    socket.emit('move-player',command)
+                });
             });
 
             socket.on('add-player',(command)=>{
@@ -46,7 +52,30 @@
                 jogo.addPlayer(command);
             });
             
+            socket.on('remove-player',(command)=>{
+                console.log(`Eliminando ${command.type} => ${command.playerId}`);
+                jogo.removePlayer(command);
+            });
+            
+            socket.on('move-player',(command)=>{
+                console.log(`Recebendo ${command.type} => ${command.playerId}`);
+                const playerId = socket.id;
 
+                if(playerId != command.playerId){
+                    jogo.movePlayer(command);
+                }
+            });
+
+            socket.on('add-fruit',(command)=>{
+                console.log(`Recebendo ${command.type} => ${command.fruitID}`);
+                jogo.addFruit(command);
+            });
+
+            
+            socket.on('remove-player',(command)=>{
+                console.log(`Eliminando ${command.type} => ${command.fruitID}`);
+                jogo.removeFruit(command);
+            });
 
             
         </script>
